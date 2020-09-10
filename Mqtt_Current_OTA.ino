@@ -1,9 +1,9 @@
  /*
  ____                          ____                            
-|  _ \ _   _ _ __ ___  _ __   / ___|  ___ _ __  ___  ___  _ __      Daniele Facco
-| |_) | | | | '_ ` _ \| '_ \  \___ \ / _ \ '_ \/ __|/ _ \| '__| 
-|  __/| |_| | | | | | | |_) |  ___) |  __/ | | \__ \ (_) | |        farsidevirtual@airmail.cc
-|_|    \__,_|_| |_| |_| .__/  |____/ \___|_| |_|___/\___/|_|   
+|  _ \ _   _ _ __ ___  _ __   / ___|  ___ _ __  ___  ___  _ __ 
+| |_) | | | | '_ ` _ \| '_ \  \___ \ / _ \ '_ \/ __|/ _ \| '__|     Daniele Facco
+|  __/| |_| | | | | | | |_) |  ___) |  __/ | | \__ \ (_) | |   
+|_|    \__,_|_| |_| |_| .__/  |____/ \___|_| |_|___/\___/|_|        FarSideVirtual@airmail.cc
                       |_|                                      
 */
 #include <ESP8266WiFi.h>
@@ -27,8 +27,6 @@ char msg[MSG_BUFFER_SIZE];
 int value = 0;
 int mA = 0;
 uint32_t Intervall_time=0;
-char message_buff[1];
-char message[4];
 
 void setup_wifi() {
 
@@ -59,7 +57,7 @@ void setup_ota(){
    ArduinoOTA.setPort(3232);
 
   // Hostname defaults to esp3232-[MAC]
-   ArduinoOTA.setHostname("NodeMCU");
+   ArduinoOTA.setHostname("myesp32");
 
   // No authentication by default
   // ArduinoOTA.setPassword("admin");
@@ -113,9 +111,9 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("hometest/test321/test", "connected");
+      client.publish("cmnd/test321/test", "connected");
       // ... and resubscribe
-      client.subscribe("hometest/test321/test");
+      client.subscribe("cmnd/test321/test");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -141,20 +139,17 @@ void loop() {
   mA = ACS.mA_AC();
   Serial.print("mA: ");
   Serial.print(mA);
-  dtostrf( mA, 5, 0, message);
-
+  String current = (String) current;
+  char message_buff[5];
+  current.toCharArray(message_buff, current.length()+1); 
+  client.publish("cmnd/test321/test", message_buff);
+  
   //MQTT
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
-  if(mA > 500){
-    client.publish("hometest/test321/test", message);
-  }
-  else{
-    client.publish("hometest/test321/test", message); 
-  }
-
-  delay(5000);
+  
+  delay(10000);
 }
 //EOF
